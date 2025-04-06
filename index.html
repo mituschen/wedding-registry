@@ -155,10 +155,6 @@
         headers: { 'Content-Type': 'application/json' }
       });
       fetchGifts();
-    }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-      fetchGifts();
     }
 
     async function addGift() {
@@ -176,18 +172,6 @@
           action: 'add',
           name, description, link, image, reservable, quantity
         }),
-        headers: { 'Content-Type': 'application/json' }
-      });
-
-      document.getElementById('giftName').value = '';
-      document.getElementById('giftDescription').value = '';
-      document.getElementById('giftLink').value = '';
-      document.getElementById('giftImage').value = '';
-      document.getElementById('giftReservable').checked = false;
-      document.getElementById('giftQuantity').value = '';
-
-      fetchGifts();
-    }),
         headers: { 'Content-Type': 'application/json' }
       });
 
