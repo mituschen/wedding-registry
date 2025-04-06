@@ -110,24 +110,18 @@
     let editingEnabled = false;
 
     async function fetchGifts() {
-      try {
-        const res = await fetch(apiUrl);
-        const data = await res.json();
-        gifts = data.map(gift => {
-          gift.reservable = gift.reservable === true || gift.reservable === 'true' || gift.reservable === 1 || gift.reservable === '1';
-          gift.id = gift.id.toString();
-          gift.reservedBy = Array.isArray(gift.reservedBy)
-            ? gift.reservedBy
-            : (typeof gift.reservedBy === 'string' && gift.reservedBy.trim())
-              ? gift.reservedBy.split(',').map(s => s.trim())
-              : [];
-          return gift;
-        });
-        renderGifts();
-      } catch (error) {
-        console.error("Error fetching gifts:", error);
-        alert("Failed to load gift list. Check your Apps Script deployment or Sheet access.");
-      }
+      const res = await fetch(apiUrl);
+      gifts = (await res.json()).map(gift => {
+        gift.reservable = gift.reservable === true || gift.reservable === 'true' || gift.reservable === 1 || gift.reservable === '1';
+        gift.id = gift.id.toString();
+        gift.reservedBy = Array.isArray(gift.reservedBy)
+          ? gift.reservedBy
+          : (typeof gift.reservedBy === 'string' && gift.reservedBy.trim())
+            ? gift.reservedBy.split(',').map(s => s.trim())
+            : [];
+        return gift;
+      });
+      renderGifts();
     }
 
     function renderGifts() {
