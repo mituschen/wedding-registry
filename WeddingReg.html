@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Wedding Gift Registry</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #fefefe;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-bottom: 4rem;
+    }
+    header {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+    header img {
+      max-width: 300px;
+      border-radius: 1rem;
+    }
+    h1 {
+      margin-top: 1rem;
+    }
+    .gift-list {
+      max-width: 600px;
+      width: 100%;
+      padding: 1rem;
+    }
+    .gift {
+      border: 1px solid #ccc;
+      padding: 1rem;
+      border-radius: 1rem;
+      margin-bottom: 1rem;
+      background: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+    .gift-info {
+      flex: 1;
+    }
+    .gift button {
+      margin-top: 0.5rem;
+      margin-right: 0.5rem;
+    }
+    .gift img {
+      max-width: 150px;
+      max-height: 150px;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    #addGiftForm {
+      margin-top: 2rem;
+      display: none;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-width: 600px;
+      width: 100%;
+    }
+    input, textarea, button, select {
+      font-size: 1rem;
+      padding: 0.5rem;
+    }
+    #passwordSection {
+      margin: 2rem 0;
+    }
+    .reserved {
+      opacity: 0.6;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="your-photo.jpg" alt="Us" />
+    <h1>Welcome to Our Wedding Gift Registry</h1>
+    <p>We're so excited to celebrate with you! Here are some gift ideas we would love. You can reserve a gift to avoid duplicates.</p>
+  </header>
+
+  <section class="gift-list" id="giftList"></section>
+
+  <section id="passwordSection">
+    <input type="password" id="adminPassword" placeholder="Enter password to edit registry">
+    <button onclick="checkPassword()">Unlock Editing</button>
+  </section>
+
+  <form id="addGiftForm">
+    <h2>Add a Gift</h2>
+    <input type="text" id="giftName" placeholder="Gift name" required>
+    <textarea id="giftDescription" placeholder="Description"></textarea>
+    <input type="url" id="giftLink" placeholder="Link to gift">
+    <input type="url" id="giftImage" placeholder="Image URL (optional)">
+    <label><input type="checkbox" id="giftReservable"> Allow reservation</label>
+    <input type="number" id="giftQuantity" placeholder="Quantity (default 1)" min="1">
+    <button type="button" onclick="addGift()">Add Gift</button>
+  </form>
+
+  <script>
+    const apiUrl = "https://script.google.com/macros/s/AKfycbwKrQwq4skbmlx7JbxSuYqZ23OuQnIXe2gpLmSGXl-dPCIAzabvaoKr0LkAXJPL9PP2FQ/exec";
+    const adminPassword = "your-password";
+    let gifts = [];
+    let editingEnabled = false;
+
+    async function fetchGifts() {
+      const res = await fetch(apiUrl);
+      gifts = (await res.json()).map(gift => {
+        gift.reservable = gift.reservable === true || gift.reservable === 'true' || gift.reservable === 1 || gift.reservable === '1';
+        gift.id = gift.id.toString();
+        gift.reservedBy = Array.isArray(gift.reservedBy)
+          ? gift.reservedBy
+          : (typeof gift.reservedBy === 'string' && gift.reservedBy.trim())
+            ? gift.reservedBy.split(',').map(s => s.trim())
+            : [];
+        return gift;
+      });
+      renderGifts();
+    }
+
+    function renderGifts() {
+      const list = document.getElementById('giftList');
+      list.innerHTML = '';
+      gifts.forEach((gift, index) => {
+        const remaining = gift.quantity ? gift.quantity - (gift.reservedBy?.length || 0) : 1;
+        const div = document.createElement('div');
+        div.className = 'gift' + (remaining === 0 ? ' reserved' : '');
+        div.innerHTML = `
+          <div class="gift-info">
+            <h3>${gift.name}</h3>
+            <p>${gift.description || ''}</p>
+            ${gift.link ? `<p><a href="${gift.link}" target="_blank">View Gift</a></p>` : ''}
+            ${gift.reservable ? `<p>Remaining: <strong>${remaining}</strong> / ${gift.quantity || 1}</p>` : ''}
+            ${gift.reservable && remaining > 0 ? `<button onclick="reserveGift('${gift.id}')">Reserve This Gift</button>` : ''}
+          </div>
+          ${gift.image ? `<img src="${gift.image}" alt="Gift image">` : ''}
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    async function reserveGift(id) {
+      const name = prompt("Enter your name to reserve this gift:");
+      if (!name) return;
+      await fetch(apiUrl, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'reserve', id, name }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+      fetchGifts();
+    }
+
+    async function addGift() {
+      const name = document.getElementById('giftName').value;
+      const description = document.getElementById('giftDescription').value;
+      const link = document.getElementById('giftLink').value;
+      const image = document.getElementById('giftImage').value;
+      const reservable = document.getElementById('giftReservable').checked;
+      const quantity = parseInt(document.getElementById('giftQuantity').value) || 1;
+
+      await fetch(apiUrl, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'add',
+          name, description, link, image, reservable, quantity
+        }),
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      document.getElementById('giftName').value = '';
+      document.getElementById('giftDescription').value = '';
+      document.getElementById('giftLink').value = '';
+      document.getElementById('giftImage').value = '';
+      document.getElementById('giftReservable').checked = false;
+      document.getElementById('giftQuantity').value = '';
+
+      fetchGifts();
+    }
+
+    function checkPassword() {
+      const input = document.getElementById('adminPassword').value;
+      if (input === adminPassword) {
+        editingEnabled = true;
+        document.getElementById('addGiftForm').style.display = 'flex';
+        alert('Editing enabled');
+      } else {
+        alert('Incorrect password');
+      }
+    }
+
+    fetchGifts();
+  </script>
+</body>
+</html>
