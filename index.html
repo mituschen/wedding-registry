@@ -18,103 +18,110 @@
       color: var(--text);
       margin: 0;
       padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding-bottom: 4rem;
     }
-    header {
+    header.hero {
+      position: relative;
+      width: 100%;
+      height: 260px;
+      overflow: hidden;
+    }
+    header.hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .hero-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       text-align: center;
-      padding: 2rem 1rem;
-    }
-    header img {
-      max-width: 300px;
+      color: white;
+      background: rgba(0,0,0,0.4);
+      padding: 1rem 2rem;
       border-radius: 1rem;
     }
-    h1 {
-      margin-top: 1rem;
+    .content {
+      max-width: 700px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+    h1, h2 {
+      margin-top: 0;
     }
     .gift-list {
-      max-width: 600px;
-      width: 100%;
-      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
     }
     .gift {
       background: var(--card-bg);
       border-radius: 1rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      padding: 1rem;
       display: flex;
-      gap: 1.5rem;
+      gap: 1rem;
       align-items: flex-start;
       transition: transform 0.2s ease;
     }
     .gift:hover {
       transform: translateY(-2px);
     }
+    .gift img {
+      max-width: 120px;
+      max-height: 120px;
+      object-fit: cover;
+      border-radius: 0.5rem;
+    }
     .gift-info {
       flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
     }
     .gift-info h3 {
-      margin: 0 0 0.5rem;
+      margin: 0 0 0.2rem;
     }
     .gift-info p {
       margin: 0.25rem 0;
       font-size: 0.95rem;
     }
-    .gift-buttons {
-      margin-top: auto;
-    }
-    .gift-buttons button {
-      margin-top: 0.5rem;
-      margin-right: 0.5rem;
+    .gift button {
       background-color: var(--primary);
       color: white;
       border: none;
-      border-radius: 0.5rem;
       padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      margin-right: 0.5rem;
       cursor: pointer;
     }
-    .gift-buttons button:hover {
+    .gift button:hover {
       background-color: #3a7ed9;
-    }
-    .gift img {
-      max-width: 160px;
-      max-height: 160px;
-      object-fit: cover;
-      border-radius: 0.75rem;
-      margin-top: 0.5rem;
-    }
-    #addGiftForm {
-      margin-top: 2rem;
-      display: none;
-      flex-direction: column;
-      gap: 0.5rem;
-      max-width: 600px;
-      width: 100%;
-      background: var(--card-bg);
-      padding: 1rem;
-      border-radius: 1rem;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
-    }
-    input, textarea, button, select {
-      font-size: 1rem;
-      padding: 0.5rem;
-      border-radius: 0.4rem;
-      border: 1px solid #ccc;
-    }
-    #passwordSection {
-      margin: 2rem 0;
-      background: var(--card-bg);
-      padding: 1rem;
-      border-radius: 1rem;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
     }
     .reserved {
       opacity: 0.6;
+    }
+    form, #passwordSection {
+      margin-top: 2rem;
+      background: var(--card-bg);
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.5rem;
+      margin-bottom: 0.75rem;
+      border-radius: 0.4rem;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    label {
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
+    button[type="submit"],
+    #unlockButton {
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 1rem;
     }
     @media (max-width: 600px) {
       .gift {
@@ -129,6 +136,174 @@
   </style>
 </head>
 <body>
-  <!-- content continues as before -->
+  <header class="hero">
+    <img src="header.jpg" alt="Us" />
+    <div class="hero-text">
+      <h1>Our Wedding Gift Registry</h1>
+      <p>We’re so excited to celebrate with you 💕</p>
+    </div>
+  </header>
+
+  <div class="content">
+    <section class="gift-list" id="giftList"></section>
+
+    <section id="passwordSection">
+      <input type="password" id="adminPassword" placeholder="Enter password to edit registry">
+      <button id="unlockButton">Unlock Editing</button>
+    </section>
+
+    <form id="addGiftForm" style="display:none;">
+      <h2>Add a Gift</h2>
+      <input type="text" id="giftName" placeholder="Gift name" required />
+      <textarea id="giftDescription" placeholder="Description"></textarea>
+      <input type="url" id="giftLink" placeholder="Link to gift" />
+      <input type="url" id="giftImage" placeholder="Image URL (optional)" />
+      <label><input type="checkbox" id="giftReservable" /> Allow reservation</label>
+      <input type="number" id="giftQuantity" placeholder="Quantity (default 1)" min="1" />
+      <button type="submit">Add Gift</button>
+    </form>
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyAHbonqdNhGhu4voImagoXTLKM6h6fryj4",
+        authDomain: "wedding-registry-714e5.firebaseapp.com",
+        databaseURL: "https://wedding-registry-714e5-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "wedding-registry-714e5",
+        storageBucket: "wedding-registry-714e5.firebasestorage.app",
+        messagingSenderId: "199927981848",
+        appId: "1:199927981848:web:f89bc0f9c74e5b7db2606d"
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+      const giftsRef = db.ref("gifts");
+
+      let editingEnabled = false;
+      const adminPassword = "your-password"; // Change this
+
+      giftsRef.on("value", snapshot => {
+        const data = snapshot.val() || [];
+        renderGifts(data);
+      });
+
+      function renderGifts(gifts) {
+        const list = document.getElementById('giftList');
+        list.innerHTML = '';
+
+        gifts.forEach((gift, index) => {
+          const reservedCount = gift.reservedBy ? gift.reservedBy.length : 0;
+          const remaining = gift.quantity ? gift.quantity - reservedCount : 1;
+
+          const div = document.createElement('div');
+          div.className = 'gift' + (remaining === 0 ? ' reserved' : '');
+
+          div.innerHTML = `
+            ${gift.image ? `<img src="${gift.image}" alt="Gift image" />` : ''}
+            <div class="gift-info">
+              <h3>${gift.name}</h3>
+              <p>${gift.description || ''}</p>
+              ${gift.link ? `<p><a href="${gift.link}" target="_blank">View Gift</a></p>` : ''}
+              ${gift.reservable ? `<p><strong>${remaining}</strong> of ${gift.quantity || 1} remaining</p>` : ''}
+              ${gift.reservable && remaining > 0 ? `<button onclick="reserveGift(${index})">Reserve</button>` : ''}
+              ${gift.reservable && gift.reservedBy?.length ? `<button onclick="unreserveGift(${index})">Unreserve</button>` : ''}
+              ${editingEnabled ? `<button onclick="editGift(${index})">Edit</button> <button onclick="deleteGift(${index})">Delete</button>` : ''}
+            </div>
+          `;
+          list.appendChild(div);
+        });
+      }
+
+      document.getElementById('unlockButton').addEventListener('click', () => {
+        const input = document.getElementById('adminPassword').value;
+        if (input === adminPassword) {
+          editingEnabled = true;
+          document.getElementById('addGiftForm').style.display = 'block';
+          alert("Editing enabled");
+        } else {
+          alert("Incorrect password");
+        }
+      });
+
+      document.getElementById('addGiftForm').addEventListener('submit', e => {
+        e.preventDefault();
+        const name = document.getElementById('giftName').value;
+        const description = document.getElementById('giftDescription').value;
+        const link = document.getElementById('giftLink').value;
+        const image = document.getElementById('giftImage').value;
+        const reservable = document.getElementById('giftReservable').checked;
+        const quantity = parseInt(document.getElementById('giftQuantity').value) || 1;
+
+        giftsRef.once("value", snapshot => {
+          const current = snapshot.val() || [];
+          current.push({ name, description, link, image, reservable, quantity, reservedBy: [] });
+          giftsRef.set(current);
+        });
+
+        e.target.reset();
+      });
+
+      window.reserveGift = index => {
+        const name = prompt("Your name to reserve:");
+        if (!name) return;
+        giftsRef.once("value", snapshot => {
+          const current = snapshot.val() || [];
+          if (!Array.isArray(current[index].reservedBy)) current[index].reservedBy = [];
+          current[index].reservedBy.push(name.trim());
+          giftsRef.set(current);
+        });
+      };
+
+      window.unreserveGift = index => {
+        const name = prompt("Enter name to unreserve:");
+        if (!name) return;
+        giftsRef.once("value", snapshot => {
+          const current = snapshot.val() || [];
+          current[index].reservedBy = current[index].reservedBy?.filter(n => n !== name.trim()) || [];
+          giftsRef.set(current);
+        });
+      };
+
+      window.deleteGift = index => {
+        if (!confirm("Delete this gift?")) return;
+        giftsRef.once("value", snapshot => {
+          const current = snapshot.val() || [];
+          current.splice(index, 1);
+          giftsRef.set(current);
+        });
+      };
+
+      window.editGift = index => {
+        giftsRef.once("value", snapshot => {
+          const current = snapshot.val() || [];
+          const gift = current[index];
+
+          const name = prompt("Edit name:", gift.name);
+          const description = prompt("Edit description:", gift.description);
+          const link = prompt("Edit link:", gift.link);
+          const image = prompt("Edit image URL:", gift.image);
+          const reservable = confirm("Is this gift reservable?");
+          const quantity = parseInt(prompt("Quantity:", gift.quantity || 1));
+
+          current[index] = {
+            ...gift,
+            name: name || gift.name,
+            description: description || gift.description,
+            link: link || gift.link,
+            image: image || gift.image,
+            reservable,
+            quantity: quantity > 0 ? quantity : 1,
+            reservedBy: reservable ? gift.reservedBy || [] : []
+          };
+
+          giftsRef.set(current);
+        });
+      };
+    });
+  </script>
 </body>
 </html>
